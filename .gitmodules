@@ -1,0 +1,3 @@
+[submodule "src/cert-manager"]
+	path = src/cert-manager
+	url = https://github.com/zyrakq/cert-manager-stack.git
