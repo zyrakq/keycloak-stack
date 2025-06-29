@@ -9,7 +9,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     healthcheck:
-      test: ["CMD-SHELL", "/bin/sh", "-c", "exec pg_isready -h 127.0.0.1"]
+      test: [ "CMD-SHELL", "/bin/sh", "-c", "exec pg_isready -h 127.0.0.1" ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -55,4 +55,5 @@ networks:
 
 volumes:
   keycloak-db:
+    name: keycloak-db
     driver: local

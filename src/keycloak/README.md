@@ -17,7 +17,7 @@ This Keycloak deployment includes:
 ### Development Deployment
 
 ```bash
-./docker-dev.sh
+./deploy.sh --development
 ```
 
 This starts Keycloak with:
@@ -26,10 +26,18 @@ This starts Keycloak with:
 - PostgreSQL exposed on `localhost:5432`
 - Admin console at `http://localhost:8080/admin`
 
+### DevContainer Deployment
+
+```bash
+./deploy.sh --devcontainer
+```
+
+This starts Keycloak for VS Code devcontainer integration with external workspace network.
+
 ### Production Deployment
 
 ```bash
-./docker-prod.sh
+./deploy.sh --production
 ```
 
 This starts Keycloak with:
@@ -64,7 +72,7 @@ cp .env.example .env
 - `POSTGRES_VERSION=16.2` - PostgreSQL version
 - `KEYCLOAK_VERSION=23.0` - Keycloak version
 
-**Production SSL (for docker-prod.sh):**
+**Production SSL (for production deployment):**
 
 - `VIRTUAL_HOST=sso.example.com` - Your domain
 - `LETSENCRYPT_HOST=sso.example.com` - SSL certificate domain
@@ -126,7 +134,7 @@ To import pre-configured realms with users and settings:
 5. **Rebuild and restart** the containers:
 
    ```bash
-   ./docker-dev.sh  # or ./docker-prod.sh
+   ./deploy.sh --development  # or ./deploy.sh --production
    ```
 
 ### Import Directory Structure
@@ -152,6 +160,16 @@ A typical realm export includes:
 
 ## Docker Compose Files
 
+### Deployment Script (`deploy.sh`)
+
+Unified deployment script that replaces individual environment scripts:
+
+```bash
+./deploy.sh --development   # Development environment
+./deploy.sh --devcontainer  # DevContainer environment
+./deploy.sh --production    # Production environment
+```
+
 ### Base Configuration (`docker-compose.yml`)
 
 - Keycloak and PostgreSQL services
@@ -164,6 +182,11 @@ A typical realm export includes:
 - Exposes ports for local access
 - Keycloak: `8080:8080`
 - PostgreSQL: `5432:5432`
+
+### DevContainer Override (`docker-compose.devcontainer.yml`)
+
+- External workspace network integration
+- VS Code devcontainer support
 
 ### Production Override (`docker-compose.cert.yml`)
 
