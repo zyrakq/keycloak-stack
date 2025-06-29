@@ -45,6 +45,11 @@
         "-c",
         "docker network ls | grep -q keycloak-stack-workspace-network || docker network create keycloak-stack-workspace-network"
     ],
+    "postCreateCommand": [
+        "bash",
+        "-c",
+        "git config --global commit.template /workspace/keycloak-stack/.gitmessage"
+    ],
     "customizations": {
         "vscode": {
             "extensions": [

@@ -139,7 +139,7 @@ To import pre-configured realms with users and settings:
 
 ### Import Directory Structure
 
-```
+```sh
 import/
 ├── .gitkeep                    # Keeps directory in git
 ├── realm-export.json          # Your realm configuration (add this)

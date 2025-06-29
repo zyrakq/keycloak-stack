@@ -11,7 +11,7 @@ Detailed git workflow rules. Includes strict commit formatting requirements, wor
 - Description "why it was done" - mandatory, no more than 72 characters per line
 - All descriptions in English language
 - Blocks separated by empty lines
-- Don't put period at end of line if there's no second sentence
+- Don't put periods at end of lines where new sentences don't start on same line
 - Answer "what" and "why" questions, not "how" (avoid implementation details)
 - Focus on business value and reasoning, not technical steps
 
