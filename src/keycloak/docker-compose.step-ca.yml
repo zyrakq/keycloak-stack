@@ -1,0 +1,11 @@
+services:
+  keycloak:
+    environment:
+      VIRTUAL_PORT: ${VIRTUAL_PORT}
+      VIRTUAL_HOST: ${VIRTUAL_HOST}
+    networks:
+      - step-ca-network
+
+networks:
+  step-ca-network:
+    external: true
