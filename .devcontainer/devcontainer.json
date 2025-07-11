@@ -16,15 +16,7 @@
     "runArgs": [
         "--name",
         "keycloak-stack-workspace",
-        "--network=keycloak-stack-workspace-network",
-        "-e",
-        "HTTP_PROXY=",
-        "-e",
-        "HTTPS_PROXY=",
-        "-e",
-        "http_proxy=",
-        "-e",
-        "https_proxy="
+        "--network=keycloak-stack-workspace-network"
     ],
     "features": {
         "ghcr.io/bartventer/arch-devcontainer-features/common-utils:1": {
