@@ -1,0 +1,55 @@
+services:
+  keycloak-db:
+    container_name: keycloak-db
+    image: postgres:${POSTGRES_VERSION:-16.2}
+    volumes:
+      - keycloak-db:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "/bin/sh", "-c", "exec pg_isready -h 127.0.0.1"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - keycloak-network
+    ports:
+      - "5432:5432"
+  keycloak:
+    container_name: keycloak
+    image: keycloak
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloak-db:5432/${POSTGRES_DB}
+      KC_DB_USERNAME: ${POSTGRES_USER}
+      KC_DB_PASSWORD: ${POSTGRES_PASSWORD}
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      KC_FEATURES: token-exchange
+      KC_HOSTNAME_STRICT: "false"
+      KC_HOSTNAME_STRICT_HTTPS: "false"
+      KC_HOSTNAME_STRICT_BACKCHANNEL: "false"
+      KC_HTTP_ENABLED: "true"
+      PROXY_ADDRESS_FORWARDING: "true"
+      KC_CACHE_STACK: tcp
+    command: "start --http-port=8080 --proxy=edge --import-realm"
+    depends_on:
+      - keycloak-db
+    networks:
+      - keycloak-network
+    ports:
+      - "8080:8080"
+    build:
+      context: .
+      args:
+        KEYCLOAK_VERSION: ${KEYCLOAK_VERSION:-23.0}
+networks:
+  keycloak-network:
+    name: keycloak-network
+    driver: bridge
+volumes:
+  keycloak-db:
+    name: keycloak-db
+    driver: local

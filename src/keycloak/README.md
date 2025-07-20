@@ -1,82 +1,196 @@
 # 🔑 Keycloak Service
 
-Keycloak Identity and Access Management server with PostgreSQL backend and realm import capabilities.
+A modular Docker Compose configuration system for Keycloak with PostgreSQL backend, realm import capabilities, and support for multiple environments.
+
+## 🏗️ Project Structure
+
+```sh
+src/keycloak/
+├── components/                              # Source compose components
+│   ├── base/                               # Base components
+│   │   ├── docker-compose.yml              # Main Keycloak + PostgreSQL services
+│   │   └── .env.example                    # Base environment variables
+│   └── environments/                       # Environment components
+│       ├── devcontainer/
+│       │   └── docker-compose.yml          # DevContainer environment
+│       ├── forwarding/
+│       │   └── docker-compose.yml          # Development with port forwarding
+│       ├── letsencrypt/
+│       │   ├── docker-compose.yml          # Let's Encrypt SSL
+│       │   └── .env.example                # Let's Encrypt variables
+│       └── step-ca/
+│           ├── docker-compose.yml          # Step CA SSL
+│           └── .env.example                # Step CA variables
+│   └── extensions/                         # Extension components
+│       └── realm-import/
+│           ├── docker-compose.yml          # Custom build with realm import
+│           ├── Dockerfile                  # Custom Keycloak image
+│           └── import/                     # Realm import directory
+├── build/                        # Generated configurations (auto-generated)
+│   ├── devcontainer/
+│   │   ├── base/                 # DevContainer + base
+│   │   └── realm-import/         # DevContainer + realm import
+│   ├── forwarding/
+│   │   ├── base/                 # Development + base
+│   │   └── realm-import/         # Development + realm import
+│   ├── letsencrypt/
+│   │   ├── base/                 # Let's Encrypt + base
+│   │   └── realm-import/         # Let's Encrypt + realm import
+│   └── step-ca/
+│       ├── base/                 # Step CA + base
+│       └── realm-import/         # Step CA + realm import
+├── build.sh                      # Build script
+└── README.md                     # This file
+```
 
 ## 🚀 Quick Start
 
-### 🔧 Development
+### 1. Build Configurations
+
+Run the build script to generate all possible combinations:
 
 ```bash
-./deploy.sh --forwarding
+./build.sh
 ```
 
-Access: `http://localhost:8080/admin`
+This will create all combinations in the `build/` directory.
 
-### 🌐 Production (Let's Encrypt)
+### 2. Choose Your Configuration
+
+Navigate to the desired configuration directory:
 
 ```bash
-./deploy.sh --letsencrypt
+# For development with port forwarding
+cd build/forwarding/base/
+
+# For DevContainer environment
+cd build/devcontainer/base/
+
+# For production with Let's Encrypt SSL
+cd build/letsencrypt/base/
+
+# For production with Step CA SSL
+cd build/step-ca/base/
 ```
 
-Requires internet access and valid domain.
+### 3. Configure Environment
 
-### 🔒 Virtual Network (Step CA)
-
-```bash
-./deploy.sh --step-ca
-```
-
-For isolated Docker networks with self-signed trusted certificates.
-
-### 📦 DevContainer
-
-```bash
-./deploy.sh --devcontainer
-```
-
-VS Code devcontainer integration.
-
-## ⚙️ Configuration
-
-Copy and edit environment file:
+Copy and edit the environment file:
 
 ```bash
 cp .env.example .env
+# Edit .env with your values
 ```
 
-**Key Variables:**
+### 4. Deploy
 
-- `KEYCLOAK_ADMIN` / `KEYCLOAK_ADMIN_PASSWORD` - Admin credentials
-- `POSTGRES_*` - Database configuration
-- `VIRTUAL_HOST` - Your domain (production)
-- `LETSENCRYPT_EMAIL` - Email for SSL certificates
+Start the services:
+
+```bash
+docker-compose up -d
+```
+
+Access: `http://localhost:8080/admin` (for forwarding mode)
+
+## 🔧 Available Configurations
+
+### Environments
+
+- **devcontainer**: Development environment with workspace network
+- **forwarding**: Development environment with port forwarding (8080, 5432)
+- **letsencrypt**: Production with Let's Encrypt SSL certificates
+- **step-ca**: Production with Step CA SSL certificates
+
+### Extensions
+
+- **realm-import**: Custom Keycloak build with realm import capabilities
+
+### Generated Combinations
+
+Each environment can be combined with any extension:
+
+- `devcontainer/base` - DevContainer development setup
+- `devcontainer/realm-import` - DevContainer with realm import
+- `forwarding/base` - Development with port forwarding
+- `forwarding/realm-import` - Development with realm import
+- `letsencrypt/base` - Production with Let's Encrypt SSL
+- `letsencrypt/realm-import` - Production with Let's Encrypt + realm import
+- `step-ca/base` - Production with Step CA SSL
+- `step-ca/realm-import` - Production with Step CA + realm import
+
+## 🔧 Environment Variables
+
+### Base Configuration
+
+- `COMPOSE_PROJECT_NAME`: Project name for Docker Compose
+- `POSTGRES_DB`: PostgreSQL database name
+- `POSTGRES_USER`: PostgreSQL username
+- `POSTGRES_PASSWORD`: PostgreSQL password
+- `KEYCLOAK_ADMIN`: Keycloak admin username
+- `KEYCLOAK_ADMIN_PASSWORD`: Keycloak admin password
+- `POSTGRES_VERSION`: PostgreSQL version (default: 16.2)
+- `KEYCLOAK_VERSION`: Keycloak version (default: 23.0)
+
+### Let's Encrypt Configuration
+
+- `VIRTUAL_PORT`: Port for nginx-proxy (default: 8080)
+- `VIRTUAL_HOST`: Domain for nginx-proxy
+- `LETSENCRYPT_HOST`: Domain for SSL certificate
+- `LETSENCRYPT_EMAIL`: Email for certificate registration
+
+### Step CA Configuration
+
+- `VIRTUAL_PORT`: Port for nginx-proxy (default: 8080)
+- `VIRTUAL_HOST`: Domain for nginx-proxy
+- `LETSENCRYPT_HOST`: Domain for SSL certificate
+- `LETSENCRYPT_EMAIL`: Email for certificate registration
 
 ## 📥 Realm Import
 
 1. Export realm from Keycloak admin console
-2. Place `realm-export.json` in `import/` directory
-3. Enable import in `docker-compose.yml`:
+2. Place `realm-export.json` in the generated configuration's `import/` directory
+3. Use a configuration with the `realm-import` extension:
 
-   ```yaml
-   command:
-     - "start"
-     - "--http-port=8080"
-     - "--proxy=edge"
-     - "--import-realm"  # Uncomment this
+   ```bash
+   ./build.sh
+   cd build/forwarding/realm-import/  # or any other environment with realm-import
+   # Place your realm-export.json in the import/ directory
+   cp /path/to/realm-export.json import/
+   docker-compose up -d --build
    ```
 
-4. Redeploy with your chosen mode
+The `realm-import` extension automatically:
 
-## 🔧 Available Commands
+- Builds a custom Keycloak image with import capabilities
+- Copies the `import/` directory into the container
+- Adds the `--import-realm` flag to the startup command
 
-- `./deploy.sh --forwarding` - Development with port forwarding
-- `./deploy.sh --devcontainer` - DevContainer environment
-- `./deploy.sh --letsencrypt` - Production with Let's Encrypt SSL
-- `./deploy.sh --step-ca` - Production with Step CA SSL
+## 🛠️ Development
+
+### Adding New Environments
+
+1. Create directory in `components/environments/` with `docker-compose.yml` and optional `.env.example` file
+2. Run `./build.sh` to generate new combinations
+
+### File Naming Convention
+
+All component files follow the standard Docker Compose naming convention (`docker-compose.yml`) for:
+
+- **VS Code compatibility**: Full support for Docker Compose language features and IntelliSense
+- **IDE integration**: Proper syntax highlighting and validation in all major editors
+- **Tool compatibility**: Works with Docker Compose plugins and extensions
+- **Standard compliance**: Follows official Docker Compose file naming patterns
+
+### Modifying Existing Components
+
+1. Edit the component files in `components/`
+2. Run `./build.sh` to regenerate configurations
+3. The `build/` directory will be completely recreated
 
 ## 🌐 Networks
 
 - **Development**: `keycloak-network` (internal)
+- **DevContainer**: `keycloak-workspace-network` (external)
 - **Let's Encrypt**: `letsencrypt-network` (external)
 - **Step CA**: `step-ca-network` (external)
 
@@ -91,13 +205,44 @@ cp .env.example .env
 
 ## 🆘 Troubleshooting
 
+**Build Issues:**
+
+- Ensure `yq` is installed: <https://github.com/mikefarah/yq#install>
+- Check component file syntax
+- Verify all required files exist
+
 **Import Issues:**
 
 - Check JSON validity
-- Verify `--import-realm` flag
+- Verify `--import-realm` flag in base component
 - Review container logs: `docker logs keycloak`
 
 **SSL Issues:**
 
 - **Let's Encrypt**: Verify domain DNS and letsencrypt-manager
 - **Step CA**: Check step-ca-manager and virtual network config
+
+## 📝 Notes
+
+- The `build/` directory is automatically generated and should not be edited manually
+- Environment variables in generated files use `$VARIABLE_NAME` format for proper interpolation
+- Each generated configuration includes a complete `docker-compose.yml` and `.env.example`
+- Missing `.env.*` files for components are handled gracefully by the build script
+
+## 🔄 Migration from Legacy Deploy Script
+
+The legacy `deploy.sh` script is still available for compatibility, but the new build system is recommended:
+
+**Legacy approach:**
+
+```bash
+./deploy.sh --forwarding
+```
+
+**New approach:**
+
+```bash
+./build.sh
+cd build/forwarding/base/
+cp .env.example .env
+docker-compose up -d

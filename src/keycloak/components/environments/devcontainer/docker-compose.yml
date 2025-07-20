@@ -1,0 +1,12 @@
+services:
+  keycloak-db:
+    networks:
+      - keycloak-workspace-network
+
+  keycloak:
+    networks:
+      - keycloak-workspace-network
+
+networks:
+  keycloak-workspace-network:
+    external: true
