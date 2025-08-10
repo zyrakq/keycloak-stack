@@ -1,0 +1,27 @@
+version: "1.0"
+groups:
+  realm:
+    description: "Realm"
+    extensions:
+      - realm-import
+  
+  step-ca:
+    description: "smallstep-ca"
+    extensions:
+      - step-ca-trust
+  
+conflicts:
+combinations:
+  - name: "realm-import+step-ca-trust"
+    extensions: ["realm-import", "step-ca-trust"]
+    description: "-"
+
+
+naming:
+  separator: "+"
+  sort: truey
+
+metadata:
+  created: "2025-08-10"
+  description: "Keycloak"
+  author: "Keycloak Stack"

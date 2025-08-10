@@ -22,23 +22,34 @@ src/keycloak/
 │           ├── docker-compose.yml          # Step CA SSL
 │           └── .env.example                # Step CA variables
 │   └── extensions/                         # Extension components
-│       └── realm-import/
-│           ├── docker-compose.yml          # Custom build with realm import
-│           ├── Dockerfile                  # Custom Keycloak image
-│           └── import/                     # Realm import directory
+│       ├── realm-import/
+│       │   ├── docker-compose.yml          # Custom build with realm import
+│       │   ├── Dockerfile                  # Custom Keycloak image
+│       │   └── import/                     # Realm import directory
+│       └── step-ca-trust/
+│           ├── docker-compose.yml          # Step CA trust integration
+│           └── .env.example                # Step CA trust variables
 ├── build/                        # Generated configurations (auto-generated)
 │   ├── devcontainer/
 │   │   ├── base/                 # DevContainer + base
-│   │   └── realm-import/         # DevContainer + realm import
+│   │   ├── realm-import/         # DevContainer + realm import
+│   │   ├── step-ca-trust/        # DevContainer + step-ca trust
+│   │   └── realm-import+step-ca-trust/  # DevContainer + realm import + step-ca trust
 │   ├── forwarding/
 │   │   ├── base/                 # Development + base
-│   │   └── realm-import/         # Development + realm import
+│   │   ├── realm-import/         # Development + realm import
+│   │   ├── step-ca-trust/        # Development + step-ca trust
+│   │   └── realm-import+step-ca-trust/  # Development + realm import + step-ca trust
 │   ├── letsencrypt/
 │   │   ├── base/                 # Let's Encrypt + base
-│   │   └── realm-import/         # Let's Encrypt + realm import
+│   │   ├── realm-import/         # Let's Encrypt + realm import
+│   │   ├── step-ca-trust/        # Let's Encrypt + step-ca trust
+│   │   └── realm-import+step-ca-trust/  # Let's Encrypt + realm import + step-ca trust
 │   └── step-ca/
 │       ├── base/                 # Step CA + base
-│       └── realm-import/         # Step CA + realm import
+│       ├── realm-import/         # Step CA + realm import
+│       ├── step-ca-trust/        # Step CA + step-ca trust
+│       └── realm-import+step-ca-trust/  # Step CA + realm import + step-ca trust
 ├── build.sh                      # Build script
 └── README.md                     # This file
 ```
@@ -104,6 +115,7 @@ Access: `http://localhost:8080/admin` (for forwarding mode)
 ### Extensions
 
 - **realm-import**: Custom Keycloak build with realm import capabilities
+- **step-ca-trust**: Adds Step CA certificates to container's trusted certificate store
 
 ### Generated Combinations
 
@@ -111,12 +123,20 @@ Each environment can be combined with any extension:
 
 - `devcontainer/base` - DevContainer development setup
 - `devcontainer/realm-import` - DevContainer with realm import
+- `devcontainer/step-ca-trust` - DevContainer with step-ca trust
+- `devcontainer/realm-import+step-ca-trust` - DevContainer with realm import + step-ca trust
 - `forwarding/base` - Development with port forwarding
 - `forwarding/realm-import` - Development with realm import
+- `forwarding/step-ca-trust` - Development with step-ca trust
+- `forwarding/realm-import+step-ca-trust` - Development with realm import + step-ca trust
 - `letsencrypt/base` - Production with Let's Encrypt SSL
 - `letsencrypt/realm-import` - Production with Let's Encrypt + realm import
+- `letsencrypt/step-ca-trust` - Production with Let's Encrypt + step-ca trust
+- `letsencrypt/realm-import+step-ca-trust` - Production with Let's Encrypt + realm import + step-ca trust
 - `step-ca/base` - Production with Step CA SSL
 - `step-ca/realm-import` - Production with Step CA + realm import
+- `step-ca/step-ca-trust` - Production with Step CA + step-ca trust
+- `step-ca/realm-import+step-ca-trust` - Production with Step CA + realm import + step-ca trust
 
 ## 🔧 Environment Variables
 
@@ -144,6 +164,11 @@ Each environment can be combined with any extension:
 - `VIRTUAL_HOST`: Domain for nginx-proxy
 - `LETSENCRYPT_HOST`: Domain for SSL certificate
 - `LETSENCRYPT_EMAIL`: Email for certificate registration
+
+### Step CA Trust Configuration
+
+- `STEP_CA_URL`: Step CA server URL for certificate retrieval
+- `STEP_CA_FINGERPRINT`: Step CA root certificate fingerprint for verification
 
 ## 📥 Realm Import
 
