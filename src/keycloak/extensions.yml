@@ -19,7 +19,7 @@ combinations:
 
 naming:
   separator: "+"
-  sort: truey
+  sort: true
 
 metadata:
   created: "2025-08-10"

@@ -2,23 +2,30 @@ services:
   keycloak-db:
     container_name: keycloak-db
     image: postgres:${POSTGRES_VERSION:-16.2}
-    volumes:
-      - keycloak-db:/var/lib/postgresql/data
+    restart: unless-stopped
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: 10m
+        max-file: 3
     healthcheck:
       test: ["CMD-SHELL", "/bin/sh", "-c", "exec pg_isready -h 127.0.0.1"]
       interval: 5s
       timeout: 5s
       retries: 5
+    volumes:
+      - keycloak-db:/var/lib/postgresql/data
     networks:
       - keycloak-network
       - keycloak-workspace-network
   keycloak:
     container_name: keycloak
     image: keycloak
+    restart: unless-stopped
     environment:
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://keycloak-db:5432/${POSTGRES_DB}
@@ -36,6 +43,11 @@ services:
       STEP_CA_TRUST: ${STEP_CA_TRUST:-true}
       STEP_CA_TRUST_RESTART: ${STEP_CA_TRUST_RESTART:-true}
     command: "start --http-port=8080 --proxy=edge --import-realm"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: 10m
+        max-file: 3
     depends_on:
       - keycloak-db
     networks:
