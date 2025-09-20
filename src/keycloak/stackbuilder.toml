@@ -1,0 +1,28 @@
+[paths]
+environments_path = "./environments"
+extensions_dirs = ["extensions"]
+
+[build]
+extensions = ["realm-import"]
+
+[build.combos]
+realm-import-trust = ["realm-import", "step-ca-trust"]
+
+[build.environments]
+available = ["devcontainer", "forwarding", "letsencrypt", "step-ca"]
+
+[build.environments.devcontainer]
+extensions = ["realm-import"]
+combos = []
+
+[build.environments.forwarding]
+extensions = ["realm-import"]
+combos = []
+
+[build.environments.letsencrypt]
+extensions = ["realm-import"]
+combos = []
+
+[build.environments.step-ca]
+extensions = ["step-ca-trust"]
+combos = ["realm-import-trust"]

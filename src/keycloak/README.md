@@ -2,69 +2,17 @@
 
 A modular Docker Compose configuration system for Keycloak with PostgreSQL backend, realm import capabilities, and support for multiple environments.
 
-## 🏗️ Project Structure
-
-```sh
-src/keycloak/
-├── components/                              # Source compose components
-│   ├── base/                               # Base components
-│   │   ├── docker-compose.yml              # Main Keycloak + PostgreSQL services
-│   │   └── .env.example                    # Base environment variables
-│   └── environments/                       # Environment components
-│       ├── devcontainer/
-│       │   └── docker-compose.yml          # DevContainer environment
-│       ├── forwarding/
-│       │   └── docker-compose.yml          # Development with port forwarding
-│       ├── letsencrypt/
-│       │   ├── docker-compose.yml          # Let's Encrypt SSL
-│       │   └── .env.example                # Let's Encrypt variables
-│       └── step-ca/
-│           ├── docker-compose.yml          # Step CA SSL
-│           └── .env.example                # Step CA variables
-│   └── extensions/                         # Extension components
-│       ├── realm-import/
-│       │   ├── docker-compose.yml          # Custom build with realm import
-│       │   ├── Dockerfile                  # Custom Keycloak image
-│       │   └── import/                     # Realm import directory
-│       └── step-ca-trust/
-│           ├── docker-compose.yml          # Step CA trust integration
-│           └── .env.example                # Step CA trust variables
-├── build/                        # Generated configurations (auto-generated)
-│   ├── devcontainer/
-│   │   ├── base/                 # DevContainer + base
-│   │   ├── realm-import/         # DevContainer + realm import
-│   │   ├── step-ca-trust/        # DevContainer + step-ca trust
-│   │   └── realm-import+step-ca-trust/  # DevContainer + realm import + step-ca trust
-│   ├── forwarding/
-│   │   ├── base/                 # Development + base
-│   │   ├── realm-import/         # Development + realm import
-│   │   ├── step-ca-trust/        # Development + step-ca trust
-│   │   └── realm-import+step-ca-trust/  # Development + realm import + step-ca trust
-│   ├── letsencrypt/
-│   │   ├── base/                 # Let's Encrypt + base
-│   │   ├── realm-import/         # Let's Encrypt + realm import
-│   │   ├── step-ca-trust/        # Let's Encrypt + step-ca trust
-│   │   └── realm-import+step-ca-trust/  # Let's Encrypt + realm import + step-ca trust
-│   └── step-ca/
-│       ├── base/                 # Step CA + base
-│       ├── realm-import/         # Step CA + realm import
-│       ├── step-ca-trust/        # Step CA + step-ca trust
-│       └── realm-import+step-ca-trust/  # Step CA + realm import + step-ca trust
-├── build.sh                      # Build script
-└── README.md                     # This file
-```
-
 ## 🚀 Quick Start
 
 ### 1. Build Configurations
 
-Run the build script to generate all possible combinations:
+Use stackbuilder to generate all configurations:
 
 ```bash
-./build.sh
+sb build
 ```
 
-This will create all combinations in the `build/` directory.
+This will create all combinations in the `build/` directory based on [`stackbuilder.toml`](stackbuilder.toml).
 
 ### 2. Choose Your Configuration
 
@@ -74,7 +22,7 @@ Navigate to the desired configuration directory:
 # For development with port forwarding
 cd build/forwarding/base/
 
-# For DevContainer environment
+# For DevContainer environment  
 cd build/devcontainer/base/
 
 # For production with Let's Encrypt SSL
@@ -98,10 +46,19 @@ cp .env.example .env
 Start the services:
 
 ```bash
-docker-compose up -d
+docker compose up --build -d
 ```
 
 Access: `http://localhost:8080/admin` (for forwarding mode)
+
+## 📁 Directory Structure
+
+- [`components/`](components/) - Source compose components
+  - [`base/`](components/base/) - Base Keycloak + PostgreSQL configuration
+  - [`environments/`](components/environments/) - Environment-specific configurations
+  - [`extensions/`](components/extensions/) - Extension components (realm import, SSL trust)
+- [`build/`](build/) - Generated configurations (auto-generated, ready to deploy)
+- [`stackbuilder.toml`](stackbuilder.toml) - Build configuration for stackbuilder
 
 ## 🔧 Available Configurations
 
@@ -116,27 +73,6 @@ Access: `http://localhost:8080/admin` (for forwarding mode)
 
 - **realm-import**: Custom Keycloak build with realm import capabilities
 - **step-ca-trust**: Adds Step CA certificates to container's trusted certificate store
-
-### Generated Combinations
-
-Each environment can be combined with any extension:
-
-- `devcontainer/base` - DevContainer development setup
-- `devcontainer/realm-import` - DevContainer with realm import
-- `devcontainer/step-ca-trust` - DevContainer with step-ca trust
-- `devcontainer/realm-import+step-ca-trust` - DevContainer with realm import + step-ca trust
-- `forwarding/base` - Development with port forwarding
-- `forwarding/realm-import` - Development with realm import
-- `forwarding/step-ca-trust` - Development with step-ca trust
-- `forwarding/realm-import+step-ca-trust` - Development with realm import + step-ca trust
-- `letsencrypt/base` - Production with Let's Encrypt SSL
-- `letsencrypt/realm-import` - Production with Let's Encrypt + realm import
-- `letsencrypt/step-ca-trust` - Production with Let's Encrypt + step-ca trust
-- `letsencrypt/realm-import+step-ca-trust` - Production with Let's Encrypt + realm import + step-ca trust
-- `step-ca/base` - Production with Step CA SSL
-- `step-ca/realm-import` - Production with Step CA + realm import
-- `step-ca/step-ca-trust` - Production with Step CA + step-ca trust
-- `step-ca/realm-import+step-ca-trust` - Production with Step CA + realm import + step-ca trust
 
 ## 🔧 Environment Variables
 
@@ -177,11 +113,11 @@ Each environment can be combined with any extension:
 3. Use a configuration with the `realm-import` extension:
 
    ```bash
-   ./build.sh
-   cd build/forwarding/realm-import/  # or any other environment with realm-import
+   sb build
+   cd build/forwarding/realm-import/
    # Place your realm-export.json in the import/ directory
    cp /path/to/realm-export.json import/
-   docker-compose up -d --build
+   docker compose up -d --build
    ```
 
 The `realm-import` extension automatically:
@@ -189,28 +125,6 @@ The `realm-import` extension automatically:
 - Builds a custom Keycloak image with import capabilities
 - Copies the `import/` directory into the container
 - Adds the `--import-realm` flag to the startup command
-
-## 🛠️ Development
-
-### Adding New Environments
-
-1. Create directory in `components/environments/` with `docker-compose.yml` and optional `.env.example` file
-2. Run `./build.sh` to generate new combinations
-
-### File Naming Convention
-
-All component files follow the standard Docker Compose naming convention (`docker-compose.yml`) for:
-
-- **VS Code compatibility**: Full support for Docker Compose language features and IntelliSense
-- **IDE integration**: Proper syntax highlighting and validation in all major editors
-- **Tool compatibility**: Works with Docker Compose plugins and extensions
-- **Standard compliance**: Follows official Docker Compose file naming patterns
-
-### Modifying Existing Components
-
-1. Edit the component files in `components/`
-2. Run `./build.sh` to regenerate configurations
-3. The `build/` directory will be completely recreated
 
 ## 🌐 Networks
 
@@ -232,7 +146,7 @@ All component files follow the standard Docker Compose naming convention (`docke
 
 **Build Issues:**
 
-- Ensure `yq` is installed: <https://github.com/mikefarah/yq#install>
+- Ensure stackbuilder is installed: <https://github.com/zyrakq/stackbuilder>
 - Check component file syntax
 - Verify all required files exist
 
@@ -252,22 +166,4 @@ All component files follow the standard Docker Compose naming convention (`docke
 - The `build/` directory is automatically generated and should not be edited manually
 - Environment variables in generated files use `$VARIABLE_NAME` format for proper interpolation
 - Each generated configuration includes a complete `docker-compose.yml` and `.env.example`
-- Missing `.env.*` files for components are handled gracefully by the build script
-
-## 🔄 Migration from Legacy Deploy Script
-
-The legacy `deploy.sh` script is still available for compatibility, but the new build system is recommended:
-
-**Legacy approach:**
-
-```bash
-./deploy.sh --forwarding
-```
-
-**New approach:**
-
-```bash
-./build.sh
-cd build/forwarding/base/
-cp .env.example .env
-docker-compose up -d
+- Use `sb build` to regenerate all configurations after modifying components

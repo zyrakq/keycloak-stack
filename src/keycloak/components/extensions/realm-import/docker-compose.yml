@@ -1,8 +1,4 @@
 services:
   keycloak:
-    image: keycloak
-    build:
-      context: .
-      args:
-        KEYCLOAK_VERSION: ${KEYCLOAK_VERSION:-23.0}
+    image: localhost/keycloak
     command: "start --http-port=8080 --proxy=edge --import-realm"

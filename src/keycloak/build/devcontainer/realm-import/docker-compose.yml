@@ -24,7 +24,7 @@ services:
       - keycloak-workspace-network
   keycloak:
     container_name: keycloak
-    image: keycloak
+    image: localhost/keycloak
     restart: unless-stopped
     environment:
       KC_DB: postgres
@@ -51,10 +51,6 @@ services:
     networks:
       - keycloak-network
       - keycloak-workspace-network
-    build:
-      context: .
-      args:
-        KEYCLOAK_VERSION: ${KEYCLOAK_VERSION:-23.0}
 networks:
   keycloak-network:
     name: keycloak-network
